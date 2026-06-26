@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Schema: Employee Training & Development System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #f3f4f6; }
+        .table-container { margin-bottom: 2rem; background: white; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); overflow: hidden; }
+        th { background-color: #1e3a8a; color: white; padding: 0.75rem 1rem; text-align: left; font-weight: 500; }
+        td { padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; color: #374151; }
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even) { background-color: #f9fafb; }
+        .mermaid { display: flex; justify-content: center; background: white; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 2rem; overflow-x: auto; }
+    </style>
+</head>
+<body class="p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-blue-900 mb-2">โครงสร้างฐานข้อมูลระบบพัฒนาบุคลากร (Training & IDP System)</h1>
+            <p class="text-gray-600">แผนภาพความสัมพันธ์ (ER Diagram) และรายละเอียดตารางข้อมูล</p>
+        </header>
+
+        <!-- ER Diagram Section -->
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 border-l-4 border-blue-600 pl-3">แผนภาพความสัมพันธ์ของระบบ (ER Diagram)</h2>
+        <div class="mermaid">
+            erDiagram
+                Locations ||--o{ Employees : "has"
+                Departments ||--o{ Employees : "has"
+                Departments ||--o{ Assessment_Templates : "uses"
+                Employees ||--o{ Assessment_Scores : "receives"
+                Employees ||--o{ IDP_Goals : "sets"
+                Employees ||--o{ Enrollments : "registers"
+                Competencies ||--o{ Assessment_Scores : "evaluated on"
+                Competencies ||--o{ Position_Competencies : "requires"
+                Courses ||--o{ Course_Sessions : "has"
+                Course_Sessions ||--o{ Session_Quotas : "allocates"
+                Locations ||--o{ Session_Quotas : "receives"
+                Course_Sessions ||--o{ Enrollments : "includes"
+
+                Employees {
+                    string Employee_ID PK "Username"
+                    string Location_ID FK
+                    string Department_ID FK
+                }
+                Locations {
+                    string Location_ID PK
+                }
+                Departments {
+                    string Department_ID PK
+                }
+                Courses {
+                    string Course_ID PK
+                }
+                Course_Sessions {
+                    string Session_ID PK
+                    string Course_ID FK
+                }
+                Enrollments {
+                    string Enrollment_ID PK
+                    string Employee_ID FK
+                    string Session_ID FK
+                }
+        </div>
+
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 border-l-4 border-blue-600 pl-3">รายละเอียดโครงสร้างตาราง (Data Dictionary)</h2>
+
+        <!-- Table 1: Employees -->
+        <div class="table-container">
+            <div class="bg-blue-100 p-3 border-b border-blue-200">
+                <h3 class="text-lg font-semibold text-blue-800 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    ตาราง Employees (ข้อมูลพนักงาน)
+                </h3>
+            </div>
+            <table class="w-full text-sm">
+                <thead>
+                    <tr><th class="w-1/3">ชื่อฟิลด์ (Field)</th><th>คำอธิบาย (Description) / การใช้งาน</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td class="font-medium text-blue-600">รหัสพนักงาน (Employee ID) [PK]</td><td>ใช้เป็น Username ในการล็อกอินเข้าสู่ระบบ</td></tr>
+                    <tr><td class="font-medium text-blue-600">รหัสผ่าน (Password)</td><td>พนักงานสามารถตั้งเองและต้องเปลี่ยนทุก 3 เดือน</td></tr>
+                    <tr><td class="font-medium text-blue-600">ชื่อ-นามสกุล / อีเมล</td><td>สำหรับพนักงานระดับ Officer ขึ้นไปที่มีอีเมลบริษัท</td></tr>
+                    <tr><td class="font-medium text-blue-600">ระดับพนักงาน (Level/Role)</td><td>เช่น พนักงานหน้างาน, Officer เพื่อใช้คัดกรองการลงทะเบียนคอร์ส</td></tr>
+                    <tr><td class="font-medium text-blue-600">รหัสสาขา/โรงงาน (Location ID) [FK]</td><td>ระบุว่าพนักงานอยู่โรงงานใด หรือออฟฟิศไหน</td></tr>
+                    <tr><td class="font-medium text-blue-600">รหัสแผนก (Department ID) [FK]</td><td>เช่น HR, Finance เพื่อดึงชุดคำถามประเมินให้ตรงแผนก</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table 2 & 3: Master Data -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="table-container">
+                <div class="bg-blue-100 p-3 border-b border-blue-200"><h3 class="text-lg font-semibold text-blue-800">ตาราง Locations (ข้อมูลสาขา)</h3></div>
+                <table class="w-full text-sm">
+                    <thead><tr><th class="w-2/5">ชื่อฟิลด์</th><th>คำอธิบาย</th></tr></thead>
+                    <tbody>
+                        <tr><td class="font-medium text-blue-600">Location ID [PK]</td><td>รหัสอ้างอิงสถานที่</td></tr>
+                        <tr><td class="font-medium text-blue-600">Location Name</td><td>เก็บข้อมูลสาขาทั้ง 6 โรงงาน และ 2 ออฟฟิศ</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <div class="bg-blue-100 p-3 border-b border-blue-200"><h3 class="text-lg font-semibold text-blue-800">ตาราง Departments (ข้อมูลแผนก)</h3></div>
+                <table class="w-full text-sm">
+                    <thead><tr><th class="w-2/5">ชื่อฟิลด์</th><th>คำอธิบาย</th></tr></thead>
+                    <tbody>
+                        <tr><td class="font-medium text-blue-600">Department ID [PK]</td><td>รหัสอ้างอิงแผนก</td></tr>
+                        <tr><td class="font-medium text-blue-600">Dept_Name / Position</td><td>เก็บข้อมูลแผนกและตำแหน่งต่างๆ ในองค์กร</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Table 4 & 5: Competencies -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="table-container">
+                <div class="bg-blue-100 p-3 border-b border-blue-200"><h3 class="text-lg font-semibold text-blue-800">ตาราง Competencies (ข้อมูลทักษะ)</h3></div>
+                <table class="w-full text-sm">
+                    <thead><tr><th class="w-2/5">ชื่อฟิลด์</th><th>คำอธิบาย</th></tr></thead>
+                    <tbody>
+                        <tr><td class="font-medium text-blue-600">Competency ID [PK]</td><td>รหัสอ้างอิงทักษะ</td></tr>
+                        <tr><td class="font-medium text-blue-600">Competency Name</td><td>ชื่อทักษะ (เช่น Communication, Digital Marketing, Data Analytic)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <div class="bg-blue-100 p-3 border-b border-blue-200"><h3 class="text-lg font-semibold text-blue-800">ตาราง Position_Competencies</h3></div>
+                <table class="w-full text-sm">
+                    <thead><tr><th class="w-2/5">ชื่อฟิลด์</th><th>คำอธิบาย</th></tr></thead>
+                    <tbody>
+                        <tr><td class="font-medium text-blue-600">Position ID [FK]</td><td>รหัสตำแหน่งงาน</td></tr>
+                        <tr><td class="font-medium text-blue-600">Competency ID [FK]</td><td>รหัสทักษะที่เกี่ยวข้อง</td></tr>
+                        <tr><td class="font-medium text-blue-600">Required Score</td><td>ระดับคะแนนที่ต้องการ (เช่น ต้องการ Communication ระดับ 4)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Table 6, 7, 8: Assessments & IDP -->
+        <div class="table-container">
+            <div class="bg-blue-100 p-3 border-b border-blue-200"><h3 class="text-lg font-semibold text-blue-800">ตาราง Assessment_Templates (ชุดคำถามประเมิน)</h3></div>
+            <table class="w-full text-sm">
+                <thead><tr><th class="w-1/3">ชื่อฟิลด์</th><th>คำอธิบาย</th></tr></thead>
+                <tbody>
+                    <tr><td class="font-medium text-blue-600">Department ID [FK]</td><td>แยกชุดคำถามให้แตกต่างกันตามแผนก</td></tr>
+                    <tr><td class="font-medium text-blue-600">Questions</td><td>ข้อคำถามที่ใช้ประเมิน</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-container">
+            <div class="bg-blue-100 p-3 border-b border-blue-200"><h3 class="text-lg font-semibold text-blue-800">ตาราง Assessment_Scores (ผลการประเมิน)</h3></div>
+            <table class="w-full text-sm">
+                <thead><tr><th class="w-1/3">ชื่อฟิลด์</th><th>คำอธิบาย</th></tr></thead>
+                <tbody>
+                    <tr><td class="font-medium text-blue-600">Employee ID [FK]</td><td>รหัสพนักงานผู้รับการประเมิน</td></tr>
+                    <tr><td class="font-medium text-blue-600">Competency ID [FK]</td><td>รหัสทักษะที่ถูกประเมิน</td></tr>
+                    <tr><td class="font-medium text-blue-600">Self Assessment Score</td><td>คะแนนประเมินตนเอง</td></tr>
+                    <tr><td class="font-medium text-blue-600">360° Score</td><td>คะแนนจากหัวหน้างานและเพื่อนร่วมงาน</td></tr>
+                    <tr><td class="font-medium text-blue-600">Skill Gap</td><td>คำนวณจาก Required Score ลบด้วยคะแนนประเมินที่ได้</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-container">
+            <div class="bg-blue-100 p-3 border-b border-blue-200"><h3 class="text-lg font-semibold text-blue-800">ตาราง IDP_Goals (เป้าหมายการพัฒนา)</h3></div>
+            <table class="w-full text-sm">
+                <thead><tr><th class="w-1/3">ชื่อฟิลด์</th><th>คำอธิบาย</th></tr></thead>
+                <tbody>
+                    <tr><td class="font-medium text-blue-600">Employee ID [FK]</td><td>รหัสพนักงานเจ้าของเป้าหมาย</td></tr>
+                    <tr><td class="font-medium text-blue-600">Short-term Goal</td><td>เป้าหมายระยะสั้น เช่น ภายใน 1 ปี</td></tr>
+                    <tr><td class="font-medium text-blue-600">Long-term Goal</td><td>เป้าหมายระยะยาว เช่น 3-5 ปี</td></tr>
+                    <tr><td class="font-medium text-blue-600">Skill Details</td><td>รายละเอียดทักษะที่จะพัฒนา</td></tr>
+                    <tr><td class="font-medium text-blue-600">Approval Status</td><td>รอดำเนินการ, หัวหน้างานอนุมัติแล้ว หรือต้องแก้ไข</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table 9, 10, 11, 12: Courses & Enrollment -->
+        <div class="table-container">
+            <div class="bg-blue-100 p-3 border-b border-blue-200">
+                <h3 class="text-lg font-semibold text-blue-800 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    ตาราง Courses (ข้อมูลหลักสูตร)
+                </h3>
+            </div>
+            <table class="w-full text-sm">
+                <thead><tr><th class="w-1/3">ชื่อฟิลด์</th><th>คำอธิบาย</th></tr></thead>
+                <tbody>
+                    <tr><td class="font-medium text-blue-600">Course Name</td><td>ชื่อคอร์ส</td></tr>
+                    <tr><td class="font-medium text-blue-600">Course Type</td><td>Online (E-learning) หรือ On-site</td></tr>
+                    <tr><td class="font-medium text-blue-600">Category/Tag</td><td>เพื่อใช้เชื่อมโยงกับ Skill Gap และแนะนำคอร์สเรียน</td></tr>
+                    <tr><td class="font-medium text-blue-600">Target Level</td><td>ระดับพนักงานที่อนุญาตให้เรียน</td></tr>
+                    <tr><td class="font-medium text-blue-600">Assessment Links</td><td>ลิงก์ Pre-test, Post-test และ Survey ลิงก์แบบประเมิน</td></tr>
+                    <tr><td class="font-medium text-blue-600">Clip</td><td>ไฟล์หรือลิงก์วิดีโอคลิปสำหรับการเรียน</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="table-container">
+                <div class="bg-blue-100 p-3 border-b border-blue-200"><h3 class="text-lg font-semibold text-blue-800">ตาราง Course_Sessions</h3></div>
+                <table class="w-full text-sm">
+                    <thead><tr><th class="w-1/3">ชื่อฟิลด์</th><th>คำอธิบาย</th></tr></thead>
+                    <tbody>
+                        <tr><td class="font-medium text-blue-600">Course ID [FK]</td><td>รหัสคอร์ส</td></tr>
+                        <tr><td class="font-medium text-blue-600">Session Date/Time</td><td>วันที่เรียน (เช่น กรุ๊ป 1: 1/7, กรุ๊ป 2: 2/7)</td></tr>
+                        <tr><td class="font-medium text-blue-600">Registration Type</td><td>First Come, First Serve หรือระบบโควตา (HR ยัดรายชื่อ)</td></tr>
+                        <tr><td class="font-medium text-blue-600">Total Capacity</td><td>จำนวนที่นั่งรวมทั้งหมดในรอบนั้น</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <div class="bg-blue-100 p-3 border-b border-blue-200"><h3 class="text-lg font-semibold text-blue-800">ตาราง Session_Quotas</h3></div>
+                <table class="w-full text-sm">
+                    <thead><tr><th class="w-1/3">ชื่อฟิลด์</th><th>คำอธิบาย</th></tr></thead>
+                    <tbody>
+                        <tr><td class="font-medium text-blue-600">Session ID [FK]</td><td>รหัสรอบการอบรม</td></tr>
+                        <tr><td class="font-medium text-blue-600">Location ID [FK]</td><td>รหัสสาขา/โรงงาน</td></tr>
+                        <tr><td class="font-medium text-blue-600">Allocated Seats</td><td>จำนวนที่นั่งที่ได้รับจัดสรร เช่น 4 คนต่อ 1 โลเคชั่น</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="bg-blue-100 p-3 border-b border-blue-200"><h3 class="text-lg font-semibold text-blue-800">ตาราง Enrollments (ประวัติการลงทะเบียนและการเรียน)</h3></div>
+            <table class="w-full text-sm">
+                <thead><tr><th class="w-1/3">ชื่อฟิลด์</th><th>คำอธิบาย</th></tr></thead>
+                <tbody>
+                    <tr><td class="font-medium text-blue-600">Employee ID [FK]</td><td>รหัสพนักงานที่ลงทะเบียน</td></tr>
+                    <tr><td class="font-medium text-blue-600">Course ID / Session ID [FK]</td><td>รหัสคอร์ส และรหัสรอบการอบรมที่เลือก</td></tr>
+                    <tr><td class="font-medium text-blue-600">Registration Status</td><td>สถานะ: สมัครแล้ว, ยกเลิกล่วงหน้า, แอดมินอนุมัติ (Approved)</td></tr>
+                    <tr><td class="font-medium text-blue-600">Completion Status</td><td>เรียนจบ, ทำ Pre-test/Post-test/Survey ครบถ้วน (ใช้แทนเช็คชื่อ)</td></tr>
+                    <tr><td class="font-medium text-blue-600">Certificate Status</td><td>ระบบออกใบเซอร์ให้เมื่อเรียนจบตามเงื่อนไขแอดมิน</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- Mermaid Script for Rendering Diagram -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</body>
+</html>
